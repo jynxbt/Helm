@@ -1,1 +1,1 @@
-export { helmWebpack } from './polyfills'
+export { polyqWebpack } from './polyfills'

@@ -2,7 +2,7 @@ import consola from 'consola'
 import type { Stage } from '../stage'
 import { run } from '../process'
 
-const logger = consola.withTag('helm:init')
+const logger = consola.withTag('polyq:init')
 
 export interface InitStageOptions {
   /** Init script path (relative to root) */

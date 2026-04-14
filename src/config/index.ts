@@ -1,13 +1,13 @@
-export { defineHelmConfig } from './types'
+export { definePolyqConfig } from './types'
 export type {
-  HelmConfig,
+  PolyqConfig,
   ProgramConfig,
   SchemaSyncConfig,
   IdlSyncConfig,
   CodegenConfig,
   PolyfillConfig,
   WorkspaceConfig,
-  ResolvedHelmConfig,
+  ResolvedPolyqConfig,
   ChainFamily,
   ProgramType,
 } from './types'

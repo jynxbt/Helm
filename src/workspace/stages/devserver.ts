@@ -2,7 +2,7 @@ import consola from 'consola'
 import type { Stage } from '../stage'
 import { run, killByPattern, isProcessRunning } from '../process'
 
-const logger = consola.withTag('helm:devserver')
+const logger = consola.withTag('polyq:devserver')
 
 export interface DevServerStageOptions {
   /** Command to run (e.g., 'bun run dev') */

@@ -4,7 +4,7 @@ import { resolve } from 'pathe'
 import { detectChain, getChainProvider } from '../src/chains'
 import { generateFromAbi } from '../src/chains/evm/codegen'
 import { buildStages } from '../src/workspace/orchestrator'
-import type { ResolvedHelmConfig } from '../src/config/types'
+import type { ResolvedPolyqConfig } from '../src/config/types'
 
 const FIXTURES = resolve(__dirname, '.chain-fixtures')
 
@@ -158,7 +158,7 @@ describe('evm codegen', () => {
 
 describe('evm orchestrator stages', () => {
   it('builds EVM stages with anvil validator', () => {
-    const config: ResolvedHelmConfig = {
+    const config: ResolvedPolyqConfig = {
       root: '/tmp/test-evm',
       _chain: 'evm',
       programs: {

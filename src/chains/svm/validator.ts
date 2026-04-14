@@ -5,7 +5,7 @@ import type { Stage } from '../../workspace/stage'
 import { spawnDetached, killByPattern, isProcessRunning, killPort } from '../../workspace/process'
 import { waitUntilReady, httpHealthCheck } from '../../workspace/health'
 
-const logger = consola.withTag('helm:validator')
+const logger = consola.withTag('polyq:validator')
 
 export interface ValidatorStageOptions {
   /** RPC URL (default: http://127.0.0.1:8899) */
@@ -20,7 +20,7 @@ export interface ValidatorStageOptions {
 
 export function createValidatorStage(options: ValidatorStageOptions): Stage {
   const rpcUrl = options.rpcUrl ?? 'http://127.0.0.1:8899'
-  const logFile = options.logFile ?? '/tmp/helm-validator.log'
+  const logFile = options.logFile ?? '/tmp/polyq-validator.log'
   const flags = options.flags ?? ['--quiet']
 
   return {

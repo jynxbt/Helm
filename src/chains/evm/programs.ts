@@ -4,7 +4,7 @@ import type { ProgramConfig } from '../../config/types'
 import { run } from '../../workspace/process'
 import type { ProgramsStageOptions } from '../types'
 
-const logger = consola.withTag('helm:evm-build')
+const logger = consola.withTag('polyq:evm-build')
 
 export function createEvmBuildStage(options: ProgramsStageOptions): Stage {
   const foundryPrograms = Object.entries(options.programs)

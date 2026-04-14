@@ -1,9 +1,9 @@
-// Helm — DX toolkit for Solana and EVM
+// Polyq — DX toolkit for Solana and EVM
 // Polyfills, schema sync, codegen, and workspace orchestration
 
-export { defineHelmConfig } from './config/types'
+export { definePolyqConfig } from './config/types'
 export type {
-  HelmConfig,
+  PolyqConfig,
   ProgramConfig,
   SchemaSyncConfig,
   IdlSyncConfig,
@@ -22,12 +22,12 @@ export type { ChainProvider, ChainDetectionResult } from './chains/types'
 export { detectSolanaPackages, detectChainPackages, resolvePolyfillNeeds, SOLANA_PACKAGES, OPTIMIZE_DEPS } from './core/detect'
 
 // Vite plugin (React, Svelte, SvelteKit, Remix, Nuxt, etc.)
-export { helmVite } from './adapters/vite/index'
-export { helmPolyfills } from './adapters/vite/polyfills'
-export { helmIdlSync } from './adapters/vite/idl-sync'
+export { polyqVite } from './adapters/vite/index'
+export { polyqPolyfills } from './adapters/vite/polyfills'
+export { polyqIdlSync } from './adapters/vite/idl-sync'
 
 // Webpack plugin (Next.js, CRA, etc.)
-export { helmWebpack } from './adapters/webpack/polyfills'
+export { polyqWebpack } from './adapters/webpack/polyfills'
 
 // Codegen
 export { generateFromSchema, generateFromIdl } from './codegen/generate'

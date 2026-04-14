@@ -2,7 +2,7 @@ import { spawn, execSync, type ChildProcess, type SpawnOptions } from 'node:chil
 import { createWriteStream } from 'node:fs'
 import consola from 'consola'
 
-const logger = consola.withTag('helm:process')
+const logger = consola.withTag('polyq:process')
 
 export interface SpawnResult {
   process: ChildProcess

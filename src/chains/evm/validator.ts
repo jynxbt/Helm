@@ -4,7 +4,7 @@ import { spawnDetached, killByPattern, isProcessRunning, killPort } from '../../
 import { waitUntilReady } from '../../workspace/health'
 import type { ValidatorStageOptions } from '../types'
 
-const logger = consola.withTag('helm:evm-node')
+const logger = consola.withTag('polyq:evm-node')
 
 interface EvmToolConfig {
   command: string
@@ -61,7 +61,7 @@ export function createEvmValidatorStage(options: ValidatorStageOptions): Stage {
   if (!config) throw new Error(`Unknown EVM tool: ${tool}. Use: ${Object.keys(EVM_TOOLS).join(', ')}`)
 
   const rpcUrl = options.rpcUrl ?? 'http://127.0.0.1:8545'
-  const logFile = options.logFile ?? `/tmp/helm-${tool}.log`
+  const logFile = options.logFile ?? `/tmp/polyq-${tool}.log`
 
   return {
     name: `EVM Node (${tool})`,

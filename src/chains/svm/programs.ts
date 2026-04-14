@@ -3,7 +3,7 @@ import type { Stage } from '../../workspace/stage'
 import type { ProgramConfig } from '../../config/types'
 import { run } from '../../workspace/process'
 
-const logger = consola.withTag('helm:programs')
+const logger = consola.withTag('polyq:programs')
 
 export interface ProgramsStageOptions {
   /** Program definitions */

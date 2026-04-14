@@ -23,7 +23,7 @@ export default defineCommand({
     const config = await loadConfig()
 
     if (!config.programs || Object.keys(config.programs).length === 0) {
-      consola.error('No programs configured. Check helm.config.ts or Anchor.toml')
+      consola.error('No programs configured. Check polyq.config.ts or Anchor.toml')
       process.exit(1)
     }
 

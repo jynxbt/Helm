@@ -1,13 +1,13 @@
-# Helm
+# Polyq
 
-Vite for Solana. Framework-agnostic DX tooling — polyfills, IDL sync, codegen, and workspace orchestration.
+DX toolkit for Solana and EVM. Framework-agnostic DX tooling — polyfills, IDL sync, codegen, and workspace orchestration.
 
 Works with **React, Next.js, Svelte, SvelteKit, Remix, Nuxt**, or any Vite/webpack project.
 
 ## Install
 
 ```bash
-npm install solana-helm
+npm install polyq
 ```
 
 ## Quick Start
@@ -16,10 +16,10 @@ npm install solana-helm
 
 ```ts
 // vite.config.ts
-import { helmVite } from 'solana-helm/vite'
+import { polyqVite } from 'polyq/vite'
 
 export default defineConfig({
-  plugins: [helmVite()],
+  plugins: [polyqVite()],
 })
 ```
 
@@ -27,10 +27,10 @@ export default defineConfig({
 
 ```ts
 // next.config.ts
-import { withHelm } from 'solana-helm/next'
+import { withPolyq } from 'polyq/next'
 
 const nextConfig = { /* ... */ }
-export default withHelm(nextConfig)
+export default withPolyq(nextConfig)
 ```
 
 ### SvelteKit
@@ -38,10 +38,10 @@ export default withHelm(nextConfig)
 ```ts
 // vite.config.ts
 import { sveltekit } from '@sveltejs/kit/vite'
-import { helmSvelteKit } from 'solana-helm/sveltekit'
+import { polyqSvelteKit } from 'polyq/sveltekit'
 
 export default defineConfig({
-  plugins: [sveltekit(), ...helmSvelteKit()],
+  plugins: [sveltekit(), ...polyqSvelteKit()],
 })
 ```
 
@@ -50,10 +50,10 @@ export default defineConfig({
 ```ts
 // vite.config.ts
 import { vitePlugin as remix } from '@remix-run/dev'
-import { helmRemix } from 'solana-helm/remix'
+import { polyqRemix } from 'polyq/remix'
 
 export default defineConfig({
-  plugins: [remix(), ...helmRemix()],
+  plugins: [remix(), ...polyqRemix()],
 })
 ```
 
@@ -62,8 +62,8 @@ export default defineConfig({
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
-  modules: ['solana-helm/nuxt'],
-  helm: {
+  modules: ['polyq/nuxt'],
+  polyq: {
     polyfills: { buffer: true },
     idlSync: {
       mapping: { my_program: ['packages/sdk/src/idl.json'] },
@@ -76,9 +76,9 @@ export default defineNuxtConfig({
 
 ```ts
 // webpack.config.js
-import { helmWebpack } from 'solana-helm/webpack'
+import { polyqWebpack } from 'polyq/webpack'
 
-const applyHelm = helmWebpack()
+const applyHelm = polyqWebpack()
 
 export default applyHelm({
   entry: './src/index.ts',
@@ -103,7 +103,7 @@ Watch `target/idl/` and auto-sync to your frontend on every `anchor build`:
 
 ```ts
 // Any Vite-based framework
-helmVite({
+polyqVite({
   idlSync: {
     watchDir: 'target/idl',
     mapping: {
@@ -120,9 +120,9 @@ No manual copying, no page refresh. The Vite dev server picks up IDL changes via
 Generate TypeScript clients from Anchor IDLs:
 
 ```bash
-helm codegen                          # All IDLs in target/idl/
-helm codegen --idl target/idl/my_program.json --out generated/
-helm codegen --watch                  # Watch + regenerate
+polyq codegen                          # All IDLs in target/idl/
+polyq codegen --idl target/idl/my_program.json --out generated/
+polyq codegen --watch                  # Watch + regenerate
 ```
 
 Generates:
@@ -137,21 +137,21 @@ Generates:
 Stage-based dev environment orchestration with proper health check polling:
 
 ```bash
-helm dev              # Docker → Validator → Build → Deploy → Init → DB → Dev Server
-helm dev --quick      # Skip program builds
-helm dev --reset      # Drop DB, clear ledger, full rebuild
-helm stop             # Stop services
-helm stop --all       # Also stop Docker
-helm status           # Show what's running
-helm build            # Build programs
-helm build --features local --parallel
+polyq dev              # Docker → Validator → Build → Deploy → Init → DB → Dev Server
+polyq dev --quick      # Skip program builds
+polyq dev --reset      # Drop DB, clear ledger, full rebuild
+polyq stop             # Stop services
+polyq stop --all       # Also stop Docker
+polyq status           # Show what's running
+polyq build            # Build programs
+polyq build --features local --parallel
 ```
 
 Replaces hundreds of lines of shell scripts with a single config:
 
 ```ts
-// helm.config.ts
-import { defineHelmConfig } from 'solana-helm'
+// polyq.config.ts
+import { defineHelmConfig } from 'polyq'
 
 export default defineHelmConfig({
   workspace: {
@@ -173,7 +173,7 @@ export default defineHelmConfig({
 
 | Feature | Vite (React, Svelte, etc.) | Next.js | SvelteKit | Remix | Nuxt |
 |---|---|---|---|---|---|
-| Auto Polyfills | `helmVite()` | `withHelm()` | `helmSvelteKit()` | `helmRemix()` | module |
+| Auto Polyfills | `polyqVite()` | `withPolyq()` | `polyqSvelteKit()` | `polyqRemix()` | module |
 | IDL Sync + HMR | yes | — | yes | yes | yes |
 | Codegen (CLI) | yes | yes | yes | yes | yes |
 | Smart Workspace | yes | yes | yes | yes | yes |
