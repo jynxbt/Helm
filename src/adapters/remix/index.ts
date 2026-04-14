@@ -1,8 +1,9 @@
+import type { Plugin } from 'vite'
 import type { PolyfillConfig, IdlSyncConfig } from '../../config/types'
-import { helmPolyfills } from '../vite/polyfills'
-import { helmIdlSync } from '../vite/idl-sync'
+import { polyqPolyfills } from '../vite/polyfills'
+import { polyqIdlSync } from '../vite/idl-sync'
 
-interface HelmRemixOptions {
+interface PolyqRemixOptions {
   polyfills?: PolyfillConfig
   idlSync?: IdlSyncConfig
 }
@@ -16,18 +17,18 @@ interface HelmRemixOptions {
  * ```ts
  * // vite.config.ts
  * import { vitePlugin as remix } from '@remix-run/dev'
- * import { helmRemix } from 'solana-helm/remix'
+ * import { polyqRemix } from 'polyq/remix'
  *
  * export default defineConfig({
- *   plugins: [remix(), ...helmRemix()],
+ *   plugins: [remix(), ...polyqRemix()],
  * })
  * ```
  */
-export function helmRemix(options?: HelmRemixOptions) {
-  const plugins = [helmPolyfills(options?.polyfills)]
+export function polyqRemix(options?: PolyqRemixOptions): Plugin[] {
+  const plugins: Plugin[] = [polyqPolyfills(options?.polyfills)]
 
   if (options?.idlSync) {
-    plugins.push(helmIdlSync(options.idlSync))
+    plugins.push(polyqIdlSync(options.idlSync))
   }
 
   return plugins

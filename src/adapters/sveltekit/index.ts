@@ -1,8 +1,9 @@
-import type { HelmConfig, PolyfillConfig, IdlSyncConfig } from '../../config/types'
-import { helmPolyfills } from '../vite/polyfills'
-import { helmIdlSync } from '../vite/idl-sync'
+import type { Plugin } from 'vite'
+import type { PolyqConfig, PolyfillConfig, IdlSyncConfig } from '../../config/types'
+import { polyqPolyfills } from '../vite/polyfills'
+import { polyqIdlSync } from '../vite/idl-sync'
 
-interface HelmSvelteKitOptions {
+interface PolyqSvelteKitOptions {
   polyfills?: PolyfillConfig
   idlSync?: IdlSyncConfig
 }
@@ -17,16 +18,16 @@ interface HelmSvelteKitOptions {
  * ```ts
  * // vite.config.ts
  * import { sveltekit } from '@sveltejs/kit/vite'
- * import { helmSvelteKit } from 'solana-helm/sveltekit'
+ * import { polyqSvelteKit } from 'polyq/sveltekit'
  *
  * export default defineConfig({
- *   plugins: [sveltekit(), ...helmSvelteKit()],
+ *   plugins: [sveltekit(), ...polyqSvelteKit()],
  * })
  * ```
  *
  * With options:
  * ```ts
- * plugins: [sveltekit(), ...helmSvelteKit({
+ * plugins: [sveltekit(), ...polyqSvelteKit({
  *   polyfills: { buffer: true },
  *   idlSync: {
  *     mapping: { my_program: ['src/lib/idl.json'] },
@@ -34,11 +35,11 @@ interface HelmSvelteKitOptions {
  * })]
  * ```
  */
-export function helmSvelteKit(options?: HelmSvelteKitOptions) {
-  const plugins = [helmPolyfills(options?.polyfills)]
+export function polyqSvelteKit(options?: PolyqSvelteKitOptions): Plugin[] {
+  const plugins: Plugin[] = [polyqPolyfills(options?.polyfills)]
 
   if (options?.idlSync) {
-    plugins.push(helmIdlSync(options.idlSync))
+    plugins.push(polyqIdlSync(options.idlSync))
   }
 
   return plugins
