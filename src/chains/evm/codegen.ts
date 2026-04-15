@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
-import { join } from 'pathe'
+import { join, resolve, relative } from 'pathe'
 import consola from 'consola'
 import type { CodegenConfig } from '../../config/types'
 import type { CodegenOutput } from '../types'
@@ -38,7 +38,17 @@ export function generateFromAbi(
   config?: Partial<CodegenConfig>,
 ): CodegenOutput {
   const raw = readFileSync(schemaPath, 'utf-8')
-  const artifact: HardhatArtifact = JSON.parse(raw)
+  let artifact: HardhatArtifact
+  try {
+    artifact = JSON.parse(raw)
+  } catch {
+    throw new Error(`Invalid JSON in ABI file: ${schemaPath}`)
+  }
+
+  if (!Array.isArray(artifact.abi)) {
+    throw new Error(`ABI file missing required "abi" array: ${schemaPath}`)
+  }
+
   const abi = artifact.abi
   const contractName = artifact.contractName
     ?? schemaPath.split('/').pop()?.replace('.json', '')
@@ -83,7 +93,10 @@ export function generateFromAbi(
   })
 
   // Write to disk
-  const contractDir = join(outDir, camelToKebab(contractName))
+  const contractDir = resolve(outDir, camelToKebab(contractName))
+  if (relative(outDir, contractDir).startsWith('..')) {
+    throw new Error(`Path traversal detected in contract name: ${contractName}`)
+  }
   mkdirSync(contractDir, { recursive: true })
   for (const file of files) {
     writeFileSync(join(contractDir, file.path), file.content, 'utf-8')

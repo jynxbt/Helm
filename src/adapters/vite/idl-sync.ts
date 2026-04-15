@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
-import { resolve, basename, dirname } from 'pathe'
+import { resolve, relative, basename, dirname } from 'pathe'
 import { watch } from 'chokidar'
 import consola from 'consola'
 import type { Plugin, ViteDevServer } from 'vite'
@@ -91,6 +91,10 @@ export function polyqIdlSync(options?: IdlSyncConfig): Plugin {
 
     for (const dest of destinations) {
       const resolvedDest = resolve(root, dest)
+      if (relative(root, resolvedDest).startsWith('..')) {
+        logger.warn(`Skipping destination outside project root: ${dest}`)
+        continue
+      }
       try {
         mkdirSync(dirname(resolvedDest), { recursive: true })
         writeFileSync(resolvedDest, content, 'utf-8')

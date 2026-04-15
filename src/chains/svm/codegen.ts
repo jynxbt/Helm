@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
-import { resolve, join } from 'pathe'
+import { resolve, join, relative } from 'pathe'
 import consola from 'consola'
 import type { CodegenConfig } from '../../config/types'
 import type { CodegenOutput } from '../types'
@@ -95,7 +95,20 @@ export function generateFromIdl(
   config?: Partial<CodegenConfig>,
 ): CodegenOutput {
   const raw = readFileSync(idlPath, 'utf-8')
-  const idl: AnchorIdl = JSON.parse(raw)
+  let idl: AnchorIdl
+  try {
+    idl = JSON.parse(raw)
+  } catch {
+    throw new Error(`Invalid JSON in IDL file: ${idlPath}`)
+  }
+
+  if (!idl.metadata?.name) {
+    throw new Error(`IDL missing required field "metadata.name": ${idlPath}`)
+  }
+  if (!Array.isArray(idl.instructions)) {
+    throw new Error(`IDL missing required field "instructions": ${idlPath}`)
+  }
+
   const features = config?.features ?? {
     types: true,
     instructions: true,
@@ -140,7 +153,10 @@ export function generateFromIdl(
   files.push({ path: 'index.ts', content: barrel })
 
   // Write files to disk
-  const programDir = join(outDir, snakeToKebab(programName))
+  const programDir = resolve(outDir, snakeToKebab(programName))
+  if (relative(outDir, programDir).startsWith('..')) {
+    throw new Error(`Path traversal detected in program name: ${programName}`)
+  }
   mkdirSync(programDir, { recursive: true })
 
   for (const file of files) {
