@@ -243,4 +243,4 @@ The workspace orchestrator runs shell commands (`psql`, `anchor`, `forge`, `dock
 
 ## License
 
-MIT
+[MIT](./LICENSE)
