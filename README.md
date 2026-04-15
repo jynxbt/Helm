@@ -235,6 +235,12 @@ IDL Sync requires Vite's dev server for HMR. Next.js projects get polyfills + co
 | `workspace.database.migrationsDir` | `string` | — | Path to SQL migration files |
 | `workspace.devServer.command` | `string` | — | Command to start your dev server |
 
+## Security
+
+`polyq.config.ts` is executed as TypeScript at load time (via [jiti](https://github.com/unjs/jiti)). This is the same model used by Vite, Nuxt, and other tools that support TypeScript config files. Only run Polyq in projects you trust — a malicious config file can execute arbitrary code.
+
+The workspace orchestrator runs shell commands (`psql`, `anchor`, `forge`, `docker`) as configured. Database URLs are passed via environment variables, not shell interpolation. Extension and database names are sanitized to prevent injection.
+
 ## License
 
 MIT
