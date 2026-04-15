@@ -1,6 +1,10 @@
-# Polyq
+<p align="center">
+  <img src="polyq.svg" alt="Polyq" width="120" />
+</p>
 
-DX toolkit for Solana and EVM. Framework-agnostic DX tooling — polyfills, IDL sync, codegen, and workspace orchestration.
+<h1 align="center">Polyq</h1>
+
+<p align="center">Chain-agnostic DX toolkit for blockchain frontends — polyfills, schema sync, codegen, and workspace orchestration.</p>
 
 Works with **React, Next.js, Svelte, SvelteKit, Remix, Nuxt**, or any Vite/webpack project.
 
