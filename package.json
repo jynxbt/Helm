@@ -73,6 +73,7 @@
     }
   },
   "license": "MIT",
+  "homepage": "https://polyq.jxbt.xyz",
   "repository": {
     "type": "git",
     "url": "https://github.com/jynxbt/PolyQ"
