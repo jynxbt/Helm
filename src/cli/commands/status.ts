@@ -12,8 +12,7 @@ export default defineCommand({
     const config = await loadConfig()
 
     if (!config.workspace) {
-      consola.error('No workspace config found')
-      process.exit(1)
+      throw new Error('No workspace config found. Add a `workspace` section to polyq.config.ts')
     }
 
     const stages = buildStages(config)

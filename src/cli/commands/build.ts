@@ -1,5 +1,4 @@
 import { defineCommand } from 'citty'
-import consola from 'consola'
 import { loadConfig } from '../../config/loader'
 import { createProgramsBuildStage } from '../../workspace/stages/programs'
 
@@ -23,8 +22,7 @@ export default defineCommand({
     const config = await loadConfig()
 
     if (!config.programs || Object.keys(config.programs).length === 0) {
-      consola.error('No programs configured. Check polyq.config.ts or Anchor.toml')
-      process.exit(1)
+      throw new Error('No programs configured. Check polyq.config.ts or Anchor.toml')
     }
 
     const features = args.features?.split(',').map(s => s.trim()) ?? []
@@ -36,11 +34,6 @@ export default defineCommand({
       root: config.root,
     })
 
-    try {
-      await stage.start()
-    } catch (err: any) {
-      consola.error(err.message)
-      process.exit(1)
-    }
+    await stage.start()
   },
 })

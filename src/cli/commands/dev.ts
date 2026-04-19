@@ -28,15 +28,17 @@ export default defineCommand({
     const config = await loadConfig()
 
     if (!config.workspace) {
-      consola.error('No workspace config found. Add a `workspace` section to polyq.config.ts')
-      consola.info('Run `polyq init` to generate a config file')
-      process.exit(1)
+      throw new Error(
+        'No workspace config found. Add a `workspace` section to polyq.config.ts ' +
+          'or run `polyq init` to generate a config file.',
+      )
     }
 
+    const only = args.only?.split(',').map(s => s.trim())
     const stages = buildStages(config, {
       quick: args.quick,
       reset: args.reset,
-      only: args.only?.split(',').map(s => s.trim()),
+      ...(only && { only }),
     })
 
     if (stages.length === 0) {
@@ -60,12 +62,12 @@ export default defineCommand({
 
     try {
       await runStages(stages)
-    } catch (err: any) {
-      consola.error(`Failed: ${err.message}`)
-      // Clean up stages that already started
+    } catch (err) {
+      // Clean up stages that already started before re-throwing — citty
+      // doesn't know about them, so we must stop them ourselves.
       consola.info('Stopping started services...')
       await stopStages(stages)
-      process.exit(1)
+      throw err
     }
   },
 })

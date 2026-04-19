@@ -1,7 +1,7 @@
-import { defineCommand } from 'citty'
 import { existsSync, writeFileSync } from 'node:fs'
-import { resolve } from 'pathe'
+import { defineCommand } from 'citty'
 import consola from 'consola'
+import { resolve } from 'pathe'
 import { detectChain, getChainProvider } from '../../chains'
 
 export default defineCommand({
@@ -25,10 +25,11 @@ export default defineCommand({
       ? JSON.stringify(programs, null, 4).replace(/"(\w+)":/g, '$1:')
       : `// No ${chain === 'svm' ? 'Anchor.toml' : 'foundry.toml / hardhat.config'} found — add programs manually`
 
-    const syncKey = chain === 'svm' ? 'idlSync' : 'schemaSync'
-    const syncComment = chain === 'svm'
-      ? "// Map IDL names to destination paths\n      // my_program: ['packages/sdk/src/idl.json'],"
-      : "// Map contract names to destination paths\n      // MyContract: ['src/abi/MyContract.json'],"
+    const syncKey = 'schemaSync'
+    const syncComment =
+      chain === 'svm'
+        ? "// Map IDL names to destination paths\n      // my_program: ['packages/sdk/src/idl.json'],"
+        : "// Map contract names to destination paths\n      // MyContract: ['src/abi/MyContract.json'],"
 
     // Chain-specific workspace defaults
     const validatorTool = chain === 'svm' ? 'solana-test-validator' : 'anvil'

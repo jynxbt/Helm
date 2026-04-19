@@ -19,17 +19,14 @@ export default defineCommand({
     const config = await loadConfig()
 
     if (!config.workspace) {
-      consola.error('No workspace config found')
-      process.exit(1)
+      throw new Error('No workspace config found. Add a `workspace` section to polyq.config.ts')
     }
 
     // Build stages just to get the stop() methods
     const stages = buildStages(config)
 
     // By default, skip Docker (like Zenned's localnet:stop)
-    const toStop = args.all
-      ? stages
-      : stages.filter(s => s.name !== 'Docker')
+    const toStop = args.all ? stages : stages.filter(s => s.name !== 'Docker')
 
     consola.info(`Stopping ${toStop.length} service(s)...`)
     await stopStages(toStop)
