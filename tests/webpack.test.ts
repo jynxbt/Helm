@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { mkdirSync, writeFileSync, rmSync } from 'node:fs'
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'pathe'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { polyqWebpack } from '../src/adapters/webpack/polyfills'
 
 const FIXTURES = resolve(__dirname, '.webpack-fixtures')
@@ -21,9 +21,12 @@ describe('polyqWebpack', () => {
 
   it('passes through config when no Solana deps detected in auto mode', () => {
     // Create a package.json with no Solana deps
-    writeFileSync(resolve(FIXTURES, 'package.json'), JSON.stringify({
-      dependencies: { react: '^18.0.0' },
-    }))
+    writeFileSync(
+      resolve(FIXTURES, 'package.json'),
+      JSON.stringify({
+        dependencies: { react: '^18.0.0' },
+      }),
+    )
 
     const apply = polyqWebpack()
     const config = { entry: './src/index.ts', resolve: {} }

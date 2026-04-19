@@ -1,6 +1,15 @@
-import { describe, it, expect } from 'vitest'
-import { polyqPolyfills } from '../src/adapters/vite/polyfills'
 import type { Plugin, UserConfig } from 'vite'
+import { describe, expect, it } from 'vitest'
+import { polyqPolyfills } from '../src/adapters/vite/polyfills'
+
+// Vite's Plugin.config type binds `this` to a plugin context that only exists
+// at runtime inside the dev server. Tests call it as a bare function, so we
+// cast the method to a plain callable shape.
+type ConfigHook = (
+  this: unknown,
+  userConfig: UserConfig,
+  env: { mode: string; command: string; isSsrBuild: boolean },
+) => unknown
 
 function callConfigHook(
   plugin: Plugin,
@@ -8,9 +17,11 @@ function callConfigHook(
   env: { isSsrBuild?: boolean } = {},
 ) {
   if (typeof plugin.config !== 'function') return undefined
-  return plugin.config(
+  const hook = plugin.config as unknown as ConfigHook
+  return hook.call(
+    null,
     { root: process.cwd(), ...userConfig },
-    { mode: 'development', command: 'serve', isSsrBuild: env.isSsrBuild ?? false } as any,
+    { mode: 'development', command: 'serve', isSsrBuild: env.isSsrBuild ?? false },
   )
 }
 

@@ -1,0 +1,9 @@
+node_modules
+.next
+# Next.js regenerates this on every `next dev` / `next build`; committing
+# it produces churn on first real use of the starter.
+next-env.d.ts
+generated
+target
+test-ledger
+.anchor

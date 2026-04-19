@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'pathe'
-import { generateFromIdl } from '../src/codegen/generate'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { generateFromIdl } from '../src/chains/svm/codegen'
 
 const FIXTURES_DIR = resolve(__dirname, '.fixtures')
 const OUT_DIR = resolve(FIXTURES_DIR, 'generated')
@@ -20,9 +20,7 @@ const MINIMAL_IDL = {
           name: 'config',
           writable: true,
           pda: {
-            seeds: [
-              { kind: 'const', value: [99, 111, 110, 102, 105, 103] },
-            ],
+            seeds: [{ kind: 'const', value: [99, 111, 110, 102, 105, 103] }],
           },
         },
         { name: 'system_program', address: '11111111111111111111111111111111' },
@@ -33,9 +31,7 @@ const MINIMAL_IDL = {
       ],
     },
   ],
-  accounts: [
-    { name: 'GlobalConfig', discriminator: [149, 8, 156, 202, 160, 252, 176, 217] },
-  ],
+  accounts: [{ name: 'GlobalConfig', discriminator: [149, 8, 156, 202, 160, 252, 176, 217] }],
   types: [
     {
       name: 'GlobalConfig',
@@ -53,11 +49,7 @@ const MINIMAL_IDL = {
       name: 'Status',
       type: {
         kind: 'enum',
-        variants: [
-          { name: 'Active' },
-          { name: 'Paused' },
-          { name: 'Closed' },
-        ],
+        variants: [{ name: 'Active' }, { name: 'Paused' }, { name: 'Closed' }],
       },
     },
   ],
@@ -70,10 +62,7 @@ const MINIMAL_IDL = {
 describe('codegen', () => {
   beforeAll(() => {
     mkdirSync(FIXTURES_DIR, { recursive: true })
-    writeFileSync(
-      resolve(FIXTURES_DIR, 'test_program.json'),
-      JSON.stringify(MINIMAL_IDL, null, 2),
-    )
+    writeFileSync(resolve(FIXTURES_DIR, 'test_program.json'), JSON.stringify(MINIMAL_IDL, null, 2))
   })
 
   afterAll(() => {
@@ -81,10 +70,7 @@ describe('codegen', () => {
   })
 
   it('generates all expected files', () => {
-    const result = generateFromIdl(
-      resolve(FIXTURES_DIR, 'test_program.json'),
-      OUT_DIR,
-    )
+    const result = generateFromIdl(resolve(FIXTURES_DIR, 'test_program.json'), OUT_DIR)
 
     expect(result.files.map(f => f.path)).toEqual([
       'types.ts',

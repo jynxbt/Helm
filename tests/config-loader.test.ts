@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs'
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'pathe'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { findProjectRoot } from '../src/chains'
 import { loadConfig } from '../src/config/loader'
 import { resolveConfig } from '../src/config/resolve'
-import { findProjectRoot } from '../src/chains'
 
 const FIXTURES = resolve(__dirname, '.config-fixtures')
 
@@ -24,17 +24,20 @@ describe('loadConfig', () => {
 
   it('auto-detects chain as svm fallback when no markers', async () => {
     const config = await loadConfig(FIXTURES)
-    expect(config._chain).toBe('svm')
+    expect(config.resolvedChain).toBe('svm')
   })
 
   it('loads polyq.config.ts when present', async () => {
     const configDir = resolve(FIXTURES, 'with-config')
     mkdirSync(configDir, { recursive: true })
-    writeFileSync(resolve(configDir, 'polyq.config.ts'), `
+    writeFileSync(
+      resolve(configDir, 'polyq.config.ts'),
+      `
       export default {
         codegen: { outDir: 'custom-generated' },
       }
-    `)
+    `,
+    )
 
     const config = await loadConfig(configDir)
     expect(config.codegen?.outDir).toBe('custom-generated')
@@ -46,7 +49,7 @@ describe('loadConfig', () => {
     writeFileSync(resolve(svmDir, 'Anchor.toml'), '[workspace]\nmembers = []')
 
     const config = await loadConfig(svmDir)
-    expect(config._chain).toBe('svm')
+    expect(config.resolvedChain).toBe('svm')
   })
 
   it('detects evm chain from foundry.toml', async () => {
@@ -55,32 +58,22 @@ describe('loadConfig', () => {
     writeFileSync(resolve(evmDir, 'foundry.toml'), '[profile.default]\nsrc = "src"')
 
     const config = await loadConfig(evmDir)
-    expect(config._chain).toBe('evm')
+    expect(config.resolvedChain).toBe('evm')
   })
 })
 
 describe('resolveConfig', () => {
-  it('merges schemaSync from idlSync for backwards compat', () => {
-    const config = resolveConfig({
-      idlSync: {
-        mapping: { my_program: ['dest/idl.json'] },
+  it('accepts explicit schemaSync mapping', () => {
+    const config = resolveConfig(
+      {
+        schemaSync: { mapping: { my_program: ['dest/idl.json'] } },
       },
-    }, FIXTURES)
-
+      FIXTURES,
+    )
     expect(config.schemaSync?.mapping).toEqual({ my_program: ['dest/idl.json'] })
-    expect(config.idlSync?.mapping).toEqual({ my_program: ['dest/idl.json'] })
   })
 
-  it('schemaSync takes precedence over idlSync', () => {
-    const config = resolveConfig({
-      idlSync: { mapping: { old: ['old.json'] } },
-      schemaSync: { mapping: { new: ['new.json'] } },
-    }, FIXTURES)
-
-    expect(config.schemaSync?.mapping).toEqual({ new: ['new.json'] })
-  })
-
-  it('sets default watchDir from chain provider', () => {
+  it('sets default watchDir from chain provider when schemaSync omitted', () => {
     const config = resolveConfig({}, FIXTURES)
     expect(config.schemaSync?.watchDir).toBeDefined()
   })

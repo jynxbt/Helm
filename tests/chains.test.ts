@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'pathe'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { detectChain, getChainProvider } from '../src/chains'
 import { generateFromAbi } from '../src/chains/evm/codegen'
-import { buildStages } from '../src/workspace/orchestrator'
 import type { ResolvedPolyqConfig } from '../src/config/types'
+import { buildStages } from '../src/workspace/orchestrator'
 
 const FIXTURES = resolve(__dirname, '.chain-fixtures')
 
@@ -99,10 +99,7 @@ describe('evm codegen', () => {
 
   beforeAll(() => {
     mkdirSync(FIXTURES, { recursive: true })
-    writeFileSync(
-      resolve(FIXTURES, 'SimpleToken.json'),
-      JSON.stringify(SAMPLE_ABI, null, 2),
-    )
+    writeFileSync(resolve(FIXTURES, 'SimpleToken.json'), JSON.stringify(SAMPLE_ABI, null, 2))
   })
 
   afterAll(() => {
@@ -110,10 +107,7 @@ describe('evm codegen', () => {
   })
 
   it('generates all expected files', () => {
-    const result = generateFromAbi(
-      resolve(FIXTURES, 'SimpleToken.json'),
-      OUT_DIR,
-    )
+    const result = generateFromAbi(resolve(FIXTURES, 'SimpleToken.json'), OUT_DIR)
 
     const paths = result.files.map(f => f.path)
     expect(paths).toContain('contract.ts')
@@ -160,7 +154,7 @@ describe('evm orchestrator stages', () => {
   it('builds EVM stages with anvil validator', () => {
     const config: ResolvedPolyqConfig = {
       root: '/tmp/test-evm',
-      _chain: 'evm',
+      resolvedChain: 'evm',
       programs: {
         myToken: {
           type: 'foundry',

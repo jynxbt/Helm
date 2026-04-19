@@ -6,23 +6,30 @@
  * Verifies: chain detection, config resolution, schema discovery, codegen,
  * adapter config generation, and polyfill correctness.
  */
-import { describe, it, expect, afterAll } from 'vitest'
-import { existsSync, readFileSync, rmSync } from 'node:fs'
+
+import { readFileSync, rmSync } from 'node:fs'
 import { resolve } from 'pathe'
-
-// Core
-import { detectChain, getChainProvider, findProjectRoot } from '../../src/chains'
-import { resolveConfig } from '../../src/config/resolve'
-import { generateFromSchema } from '../../src/codegen/generate'
-
+import { afterAll, describe, expect, it } from 'vitest'
+import { withPolyq } from '../../src/adapters/next/index'
+import { polyqRemix } from '../../src/adapters/remix/index'
+import { polyqSvelteKit } from '../../src/adapters/sveltekit/index'
 // Adapters
 import { polyqVite } from '../../src/adapters/vite/index'
 import { polyqPolyfills } from '../../src/adapters/vite/polyfills'
-import { polyqIdlSync } from '../../src/adapters/vite/idl-sync'
-import { withPolyq } from '../../src/adapters/next/index'
-import { polyqSvelteKit } from '../../src/adapters/sveltekit/index'
-import { polyqRemix } from '../../src/adapters/remix/index'
+import { polyqSchemaSync } from '../../src/adapters/vite/schema-sync'
 import { polyqWebpack } from '../../src/adapters/webpack/polyfills'
+// Core
+import { detectChain, findProjectRoot, getChainProvider } from '../../src/chains'
+import type { CodegenOutput } from '../../src/chains/types'
+import { generateFromSchema } from '../../src/codegen/generate'
+import { resolveConfig } from '../../src/config/resolve'
+
+// `generateFromSchema` returns `CodegenOutput | Promise<CodegenOutput>` (kit
+// mode is async). Legacy paths are sync; tests assert on `.files` directly.
+function syncResult(r: CodegenOutput | Promise<CodegenOutput>): CodegenOutput {
+  if (r instanceof Promise) throw new Error('expected sync codegen result')
+  return r
+}
 
 const SVM_ROOT = resolve(__dirname, 'fixtures/svm')
 const EVM_ROOT = resolve(__dirname, 'fixtures/evm')
@@ -53,8 +60,8 @@ describe('SVM chain detection (all frameworks)', () => {
     const programs = provider.detectPrograms(SVM_ROOT)
     expect(programs).toBeDefined()
     expect(programs!.testProgram).toBeDefined()
-    expect(programs!.testProgram.type).toBe('anchor')
-    expect(programs!.testProgram.programId?.localnet).toBe('11111111111111111111111111111111')
+    expect(programs!.testProgram!.type).toBe('anchor')
+    expect(programs!.testProgram!.programId?.localnet).toBe('11111111111111111111111111111111')
   })
 
   it('resolves config with correct chain and programs', () => {
@@ -107,7 +114,7 @@ describe('EVM chain detection (all frameworks)', () => {
 
 describe('SVM codegen (shared across frameworks)', () => {
   it('generates all 6 files from SVM IDL', () => {
-    const result = generateFromSchema(SVM_IDL, OUT_DIR, undefined, 'svm')
+    const result = syncResult(generateFromSchema(SVM_IDL, OUT_DIR, undefined, 'svm'))
     const paths = result.files.map(f => f.path)
     expect(paths).toContain('types.ts')
     expect(paths).toContain('pda.ts')
@@ -167,7 +174,7 @@ describe('SVM codegen (shared across frameworks)', () => {
 
 describe('EVM codegen (shared across frameworks)', () => {
   it('generates files from EVM ABI', () => {
-    const result = generateFromSchema(EVM_ABI, OUT_DIR, undefined, 'evm')
+    const result = syncResult(generateFromSchema(EVM_ABI, OUT_DIR, undefined, 'evm'))
     const paths = result.files.map(f => f.path)
     expect(paths).toContain('contract.ts')
     expect(paths).toContain('types.ts')
@@ -210,7 +217,7 @@ describe('Vite + React adapter', () => {
     const plugins = polyqVite()
     expect(Array.isArray(plugins)).toBe(true)
     expect(plugins.length).toBeGreaterThanOrEqual(1)
-    expect(plugins[0].name).toBe('polyq:polyfills')
+    expect(plugins[0]!.name).toBe('polyq:polyfills')
   })
 
   it('polyqVite() with schemaSync returns 2 plugins', () => {
@@ -221,14 +228,7 @@ describe('Vite + React adapter', () => {
       },
     })
     expect(plugins.length).toBe(2)
-    expect(plugins[1].name).toBe('polyq:idl-sync')
-  })
-
-  it('polyqVite() with idlSync (backwards compat) returns 2 plugins', () => {
-    const plugins = polyqVite({
-      idlSync: { mapping: { test: ['dest.json'] } },
-    })
-    expect(plugins.length).toBe(2)
+    expect(plugins[1]!.name).toBe('polyq:schema-sync')
   })
 
   it('polyfill plugin sets global and buffer in manual mode', () => {
@@ -258,42 +258,48 @@ describe('Next.js adapter (webpack + Turbopack)', () => {
   it('withPolyq() returns NextConfig with turbopack and webpack', () => {
     const result = withPolyq({}, { polyfills: { mode: 'manual', buffer: true } })
     expect(result.turbopack).toBeDefined()
-    expect(result.turbopack.resolveAlias).toBeDefined()
+    expect(result.turbopack!.resolveAlias).toBeDefined()
     expect(typeof result.webpack).toBe('function')
   })
 
   it('Turbopack gets fs/net/tls stubs', () => {
     const result = withPolyq({}, { polyfills: { mode: 'manual', buffer: true } })
-    expect(result.turbopack.resolveAlias.fs).toBeDefined()
-    expect(result.turbopack.resolveAlias.net).toBeDefined()
-    expect(result.turbopack.resolveAlias.tls).toBeDefined()
+    expect(result.turbopack!.resolveAlias!.fs).toBeDefined()
+    expect(result.turbopack!.resolveAlias!.net).toBeDefined()
+    expect(result.turbopack!.resolveAlias!.tls).toBeDefined()
   })
 
   it('Turbopack gets buffer alias', () => {
     const result = withPolyq({}, { polyfills: { mode: 'manual', buffer: true } })
-    expect(result.turbopack.resolveAlias.buffer).toEqual({ browser: 'buffer/' })
+    expect(result.turbopack!.resolveAlias!.buffer).toEqual({ browser: 'buffer/' })
   })
 
   it('preserves existing turbopack config', () => {
-    const result = withPolyq({
-      turbopack: {
-        root: '/my/root',
-        resolveAlias: { custom: './custom.ts' },
+    const result = withPolyq(
+      {
+        turbopack: {
+          root: '/my/root',
+          resolveAlias: { custom: './custom.ts' },
+        },
       },
-    }, { polyfills: { mode: 'manual', buffer: true } })
-    expect(result.turbopack.root).toBe('/my/root')
-    expect(result.turbopack.resolveAlias.custom).toBe('./custom.ts')
-    expect(result.turbopack.resolveAlias.fs).toBeDefined()
+      { polyfills: { mode: 'manual', buffer: true } },
+    )
+    expect(result.turbopack!.root).toBe('/my/root')
+    expect(result.turbopack!.resolveAlias!.custom).toBe('./custom.ts')
+    expect(result.turbopack!.resolveAlias!.fs).toBeDefined()
   })
 
   it('preserves existing webpack function', () => {
     let originalCalled = false
-    const result = withPolyq({
-      webpack(config: any, ctx: any) {
-        originalCalled = true
-        return config
+    const result = withPolyq(
+      {
+        webpack(config: any, _ctx: any) {
+          originalCalled = true
+          return config
+        },
       },
-    }, { polyfills: { mode: 'manual', buffer: true } })
+      { polyfills: { mode: 'manual', buffer: true } },
+    )
     result.webpack!({}, { isServer: true })
     expect(originalCalled).toBe(true)
   })
@@ -331,12 +337,12 @@ describe('Nuxt module (config shape)', () => {
     expect(plugin.enforce).toBe('pre')
   })
 
-  it('polyqIdlSync works for Nuxt (same as Vite)', () => {
-    const plugin = polyqIdlSync({
+  it('polyqSchemaSync works for Nuxt (same as Vite)', () => {
+    const plugin = polyqSchemaSync({
       watchDir: 'target/idl',
       mapping: { test: ['dest.json'] },
     })
-    expect(plugin.name).toBe('polyq:idl-sync')
+    expect(plugin.name).toBe('polyq:schema-sync')
     expect(plugin.configureServer).toBeDefined()
   })
 })
@@ -348,22 +354,22 @@ describe('SvelteKit adapter', () => {
     const plugins = polyqSvelteKit()
     expect(Array.isArray(plugins)).toBe(true)
     expect(plugins.length).toBe(1)
-    expect(plugins[0].name).toBe('polyq:polyfills')
+    expect(plugins[0]!.name).toBe('polyq:polyfills')
   })
 
-  it('returns 2 plugins with idlSync', () => {
+  it('returns 2 plugins with schemaSync', () => {
     const plugins = polyqSvelteKit({
-      idlSync: { mapping: { test: ['dest.json'] } },
+      schemaSync: { mapping: { test: ['dest.json'] } },
     })
     expect(plugins.length).toBe(2)
-    expect(plugins[1].name).toBe('polyq:idl-sync')
+    expect(plugins[1]!.name).toBe('polyq:schema-sync')
   })
 
   it('accepts polyfill options', () => {
     const plugins = polyqSvelteKit({
       polyfills: { mode: 'manual', buffer: true },
     })
-    expect(plugins[0].name).toBe('polyq:polyfills')
+    expect(plugins[0]!.name).toBe('polyq:polyfills')
   })
 })
 
@@ -374,12 +380,12 @@ describe('Remix adapter', () => {
     const plugins = polyqRemix()
     expect(Array.isArray(plugins)).toBe(true)
     expect(plugins.length).toBe(1)
-    expect(plugins[0].name).toBe('polyq:polyfills')
+    expect(plugins[0]!.name).toBe('polyq:polyfills')
   })
 
-  it('returns 2 plugins with idlSync', () => {
+  it('returns 2 plugins with schemaSync', () => {
     const plugins = polyqRemix({
-      idlSync: { mapping: { test: ['dest.json'] } },
+      schemaSync: { mapping: { test: ['dest.json'] } },
     })
     expect(plugins.length).toBe(2)
   })
@@ -419,13 +425,16 @@ describe('Security: path traversal protection', () => {
     const maliciousIdl = resolve(__dirname, '.framework-codegen-output/malicious.json')
     const { writeFileSync, mkdirSync } = require('node:fs')
     mkdirSync(resolve(__dirname, '.framework-codegen-output'), { recursive: true })
-    writeFileSync(maliciousIdl, JSON.stringify({
-      address: '11111111111111111111111111111111',
-      metadata: { name: '../../../etc/evil', version: '0.1.0', spec: '0.1.0' },
-      instructions: [],
-      accounts: [],
-      types: [],
-    }))
+    writeFileSync(
+      maliciousIdl,
+      JSON.stringify({
+        address: '11111111111111111111111111111111',
+        metadata: { name: '../../../etc/evil', version: '0.1.0', spec: '0.1.0' },
+        instructions: [],
+        accounts: [],
+        types: [],
+      }),
+    )
 
     expect(() => {
       generateFromSchema(maliciousIdl, OUT_DIR, undefined, 'svm')
@@ -435,10 +444,13 @@ describe('Security: path traversal protection', () => {
   it('EVM codegen blocks path traversal in contract name', () => {
     const maliciousAbi = resolve(__dirname, '.framework-codegen-output/evil.json')
     const { writeFileSync } = require('node:fs')
-    writeFileSync(maliciousAbi, JSON.stringify({
-      contractName: '../../../etc/evil',
-      abi: [],
-    }))
+    writeFileSync(
+      maliciousAbi,
+      JSON.stringify({
+        contractName: '../../../etc/evil',
+        abi: [],
+      }),
+    )
 
     expect(() => {
       generateFromSchema(maliciousAbi, OUT_DIR, undefined, 'evm')

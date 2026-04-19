@@ -1,0 +1,18 @@
+[toolchain]
+anchor_version = "0.31.0"
+
+[features]
+seeds = false
+
+# Placeholder — `anchor keys sync` rewrites this on first build with the keypair
+# at `target/deploy/counter-keypair.json`. Any valid 44-char base58 string works
+# as a stub until then.
+[programs.localnet]
+counter = "Fg6PaFpoGXkYsidMpWxqSWwhXwRMcENz7ZDAtDqG5r4"
+
+[workspace]
+members = ["programs/counter"]
+
+[provider]
+cluster = "Localnet"
+wallet = "~/.config/solana/id.json"

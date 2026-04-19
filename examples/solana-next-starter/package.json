@@ -1,0 +1,26 @@
+{
+  "name": "solana-next-starter",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "codegen": "polyq codegen",
+    "workspace": "polyq dev"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.31.0",
+    "@coral-xyz/borsh": "^0.31.0",
+    "@solana/web3.js": "^1.95.0",
+    "next": "^15.0.0",
+    "polyq": "file:../..",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^6.0.0"
+  }
+}

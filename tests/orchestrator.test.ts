@@ -1,16 +1,16 @@
-import { describe, it, expect } from 'vitest'
-import { buildStages } from '../src/workspace/orchestrator'
+import { describe, expect, it } from 'vitest'
 import type { ResolvedPolyqConfig } from '../src/config/types'
+import { buildStages } from '../src/workspace/orchestrator'
 
 function makeConfig(overrides?: Partial<ResolvedPolyqConfig>): ResolvedPolyqConfig {
   return {
     root: '/tmp/test-project',
-    _chain: 'svm' as const,
+    resolvedChain: 'svm' as const,
     programs: {
       myProgram: {
         type: 'anchor',
         path: 'programs/my-program',
-        idl: 'target/idl/my_program.json',
+        schema: 'target/idl/my_program.json',
         programId: { localnet: '11111111111111111111111111111111' },
       },
     },
@@ -48,12 +48,7 @@ describe('buildStages', () => {
   it('skips program stages with --quick', () => {
     const stages = buildStages(makeConfig(), { quick: true })
     const names = stages.map(s => s.name)
-    expect(names).toEqual([
-      'Docker',
-      'Validator',
-      'Database',
-      'Dev Server',
-    ])
+    expect(names).toEqual(['Docker', 'Validator', 'Database', 'Dev Server'])
   })
 
   it('uses reset stages with --reset', () => {
@@ -66,7 +61,7 @@ describe('buildStages', () => {
   it('filters by --only', () => {
     const stages = buildStages(makeConfig(), { only: ['validator'] })
     expect(stages).toHaveLength(1)
-    expect(stages[0].name).toBe('Validator')
+    expect(stages[0]!.name).toBe('Validator')
   })
 
   it('skips docker when disabled', () => {

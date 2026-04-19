@@ -1,0 +1,3 @@
+anchor=0.31.0
+solana=stable
+rust=stable

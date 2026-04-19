@@ -1,0 +1,15 @@
+[toolchain]
+anchor_version = "0.31.0"
+
+[features]
+seeds = false
+
+[programs.localnet]
+counter = "Fg6PaFpoGXkYsidMpWxqSWwhXwRMcENz7ZDAtDqG5r4"
+
+[workspace]
+members = ["programs/counter"]
+
+[provider]
+cluster = "Localnet"
+wallet = "~/.config/solana/id.json"
